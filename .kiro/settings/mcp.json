@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "kb-audit": {
+      "command": "uv",
+      "args": ["run", "python", "scripts/mcp_audit_server.py"],
+      "env": { "AWS_REGION": "ap-northeast-1" },
+      "disabled": false,
+      "autoApprove": ["list_departments"]
+    },
+    "aws-docs": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@1.2.2"],
+      "env": { "FASTMCP_LOG_LEVEL": "ERROR" },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

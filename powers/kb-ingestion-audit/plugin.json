@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "kb-ingestion-audit",
+  "version": "1.0.0",
+  "description": "Audit whether Amazon Bedrock Managed Knowledge Base chunks still match their source Markdown character for character, per department, without leaking other departments' text.",
+  "author": { "name": "takke1986", "url": "https://github.com/takke1986" },
+  "keywords": ["knowledge base", "kb audit", "ingestion", "chunk", "verbatim", "取り込み監査", "チャンク", "原文一致", "部署"],
+  "homepage": "https://github.com/takke1986/managed-kb-dept-knowledge",
+  "repository": "https://github.com/takke1986/managed-kb-dept-knowledge",
+  "license": "MIT"
+}

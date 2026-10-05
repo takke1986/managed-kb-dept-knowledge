@@ -1,0 +1,11 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "kb-audit": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "python", "scripts/mcp_audit_server.py"],
+      "env": { "AWS_REGION": "ap-northeast-1" }
+    }
+  }
+}

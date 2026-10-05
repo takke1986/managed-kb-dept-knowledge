@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Run audit tests on save",
+      "trigger": "PostFileSave",
+      "matcher": "(kbaudit|tests)/.*\\.py$",
+      "action": { "type": "command", "command": "uv run pytest -q", "timeout": 120 }
+    },
+    {
+      "name": "Ruff on save",
+      "trigger": "PostFileSave",
+      "matcher": "(kbaudit|tests|scripts)/.*\\.py$",
+      "action": { "type": "command", "command": "uv run ruff check kbaudit tests scripts" }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "kb-auditor",
+  "description": "KB の取り込み結果を部署ごとに監査する読み取り専用のエージェント。原文との差分だけを報告し、ファイルや AWS リソースを変更しない。",
+  "prompt": "あなたは Amazon Bedrock Managed Knowledge Base の取り込み監査担当である。kb-audit MCP の audit_department で部署ごとに監査し、verbatim 率と altered の差分スパンを日本語で報告する。unmatched の理由が isolation のものは部署分離の不具合として最優先で報告する。チャンク本文は貼らず、差分スパンだけを示す。ファイルの編集、KB の再同期、S3 への書き込みはしない。原因の調査に必要なら kbaudit/ と functions/convert/ を読み、修正案は文章で提案するにとどめる。",
+  "welcomeMessage": "どの部署の取り込みを監査しますか？（例: 全部署を監査して）",
+  "tools": ["read", "glob", "grep", "shell", "@kb-audit", "@aws-docs"],
+  "allowedTools": ["read", "glob", "grep", "@kb-audit", "@aws-docs"],
+  "toolsSettings": {
+    "shell": {
+      "allowedCommands": ["uv run pytest.*", "uv run python scripts/audit_ingestion\\.py [a-z]+( --json \\S+)?", "git (status|log|diff).*"],
+      "deniedCommands": ["rm .*", "aws .* (delete|put|start|update|create).*", "git (push|commit|reset).*"],
+      "autoAllowReadonly": true
+    }
+  },
+  "includeMcpJson": true,
+  "resources": [
+    "file://.kiro/steering/**/*.md",
+    "file://.kiro/specs/kb-ingestion-audit/*.md",
+    "skill://powers/kb-ingestion-audit/skills/**/SKILL.md"
+  ]
+}

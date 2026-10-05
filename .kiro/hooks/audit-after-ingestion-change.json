@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Remind to audit after ingestion changes",
+      "trigger": "PostFileSave",
+      "matcher": "functions/(convert|sync)/.*\\.py$",
+      "action": {
+        "type": "agent",
+        "prompt": "取り込み処理（functions/convert または functions/sync）が変わった。.kiro/steering/kb-ingestion.md の規則に反していないか確認し、デプロイ後に kb-audit の audit_department を全部署で実行して verbatim 率が下がっていないか確かめるよう、ユーザーに一文で伝えること。"
+      }
+    }
+  ]
+}
