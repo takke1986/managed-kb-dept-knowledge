@@ -147,7 +147,12 @@ the acceptance criteria.
 3. **Width invariance** - replacing ASCII letters and digits in `s` with their full-width
    forms does not change `normalise(s)`. *(Req 1.3)*
 4. **Every excerpt is verbatim** - for any source `t` and any slice `t[i:j]` whose
-   normalisation is non-empty, `classify(t[i:j], {}, t) == VERBATIM`. *(Req 2.1)*
+   normalisation is non-empty, `classify(t[i:j], {}, t) == VERBATIM`, provided `i` and `j`
+   are clean cuts: `normalise(t[:k]) + normalise(t[k:]) == normalise(t)`. A cut between a
+   base character and a combining mark (`か` | U+3099) is not clean, because the excerpt
+   cannot compose to `が`; the KB's chunker never cuts there. Property-based testing found
+   this boundary, and also a real bug - `normalise` was not idempotent when NFKC decomposed
+   U+309B into a space plus a combining mark - which is now fixed. *(Req 2.1)*
 5. **A change is never verbatim** - for any source `t` and excerpt `e = t[i:j]`, if `e'`
    differs from `e` in one character and `normalise(e')` is not a substring of
    `normalise(t)`, then `classify(e', {}, t) == ALTERED`. *(Req 2.2)*

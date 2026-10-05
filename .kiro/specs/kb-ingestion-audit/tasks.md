@@ -6,40 +6,40 @@
   - Add `pytest` and `hypothesis` to the `dev` dependency group in `pyproject.toml`
   - _Requirements: 4_
 
-- [ ] 2. Implement normalisation
+- [x] 2. Implement normalisation
   - [x] 2.1 Write `kbaudit/normalise.py` with `normalise(text)` (NFKC, then remove whitespace)
     - _Requirements: 1.1, 1.3_
   - [x] 2.2 Unit tests: full-width digits and letters, ideographic space, line breaks
     - _Requirements: 1.1, 1.3_
-  - [ ] 2.3 Property tests for properties 1-3 (idempotence, whitespace, width)
+  - [x] 2.3 Property tests for properties 1-3 (idempotence, whitespace, width)
     - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 3. Implement the verdict
+- [x] 3. Implement the verdict
   - [x] 3.1 Write `kbaudit/matching.py` with `Verdict`, `Result` and `classify`
     - Check order: image metadata, empty, missing source, substring
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
   - [x] 3.2 Unit tests from measured cases: `膳所営業所` -> `陸所営業所`, `○%` -> `0%`,
     image chunk, empty chunk, missing source
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
-  - [ ] 3.3 Property tests for properties 4-6
+  - [x] 3.3 Property tests for properties 4-6
     - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 4. Implement span reporting
+- [x] 4. Implement span reporting
   - [x] 4.1 Write `kbaudit/spans.py` with `Span` and `diff_spans`
     - _Requirements: 3.1, 3.2, 3.3_
   - [x] 4.2 Unit test: a substituted proper noun is reported as exactly that pair
     - _Requirements: 3.2_
-  - [ ] 4.3 Property tests for properties 7-8
+  - [x] 4.3 Property tests for properties 7-8
     - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 5. Implement collection
+- [x] 5. Implement collection
   - [x] 5.1 Write `kbaudit/collect.py` with `source_key_for` (reuse `DocRef`) and
     `collect_chunks` (de-duplicate on location plus text)
     - _Requirements: 4.1, 4.2, 5.1_
   - [x] 5.2 Unit tests with a fake `retrieve`: duplicates across queries, a chunk from
     another department
     - _Requirements: 4.2, 5.2_
-  - [ ] 5.3 Property test for property 9
+  - [-] 5.3 Property test for property 9
     - _Requirements: 4.2_
 
 - [x] 6. Wire the command line
