@@ -11,6 +11,41 @@ Amazon Bedrock Managed Knowledge Base をファイル置き場として使い、
 
 リージョンは `config/app.json` の `region`（ap-northeast-1、東京）。CloudFront 用の WAF だけ us-east-1。モデルは国内の推論プロファイル（`jp.*`）を使う。
 
+## Kiro で作った部分（KB 取り込み監査）
+
+> **For Kiro University judges (English summary).** Managed KB parses each document twice
+> and the second pass overwrites the first; for Japanese it sometimes rewrites proper nouns
+> and numbers (`膳所営業所` → `陸所営業所`, `○%` → `0%`). Nothing in the KB tells you this
+> happened. This repo adds an **ingestion audit**: it retrieves chunks as a real member of
+> each department (through the same Gateway the users use) and checks that every chunk
+> appears verbatim in its source Markdown, reporting the smallest differing span and never
+> printing another department's text. Built spec-first in Kiro; property-based tests
+> generated in Kiro IDE found a real Unicode bug in the normaliser. Run against the deployed
+> stack: **sales 11/11, legal 125/125 verbatim**.
+
+Managed KB は取り込み時に文書を2回解析し、2回目の結果で上書きする。日本語では2回目が固有名詞や数値を書き換えることがあり、KB からはそれが分からない。そこで、検索で返るチャンクが原文の Markdown にそのまま含まれるかを、部署ごとに確かめる監査を足した。
+
+```sh
+uv run python scripts/audit_ingestion.py sales            # 部署のメンバーとして監査（終了コード 0=一致 / 1=変化あり / 2=未定義の部署）
+uv run python scripts/audit_ingestion.py legal --json .state/audit-legal.json
+uv run pytest -q                                          # 38件（性質テストを含む）
+```
+
+デプロイ済みのスタックでの結果（2026-10-06）: 営業部 11/11、法務部 125/125 が verbatim。未定義の部署は AWS に触れる前に終了コード 2 で止まる。
+
+| Kiro の機能 | ファイル | 使い方 |
+|---|---|---|
+| 仕様（Spec） | `.kiro/specs/kb-ingestion-audit/` | 要件を EARS で5つ（正規化・判定・差分・CLI・部署分離）。設計に正しさの性質を9つ書き、タスクはそこから起こした |
+| ステアリング | `.kiro/steering/` | `product.md`・`tech.md` は常時。`kb-ingestion.md`・`audit-matching.md` は該当パスを触るときだけ読み込む（fileMatch）。「期待値を正規化してから比べない」などの規則を置いた |
+| フック | `.kiro/hooks/` | エージェントが Python を保存したら pytest と ruff を自動で実行。取り込み処理（`functions/convert`・`sync`）を変えたら、再監査を促すようエージェントに指示する |
+| 性質テスト（PBT） | `tests/test_*_properties.py` | Kiro IDE が設計の性質から Hypothesis のテストを生成。正規化が冪等でない不具合（単独の濁点 U+309B が NFKC で「空白＋結合濁点」に分かれ、2回目で前の仮名と合成される）を見つけ、修正した。性質4の前提が強すぎたことも分かり、設計を直した |
+| MCP | `.kiro/settings/mcp.json`、`scripts/mcp_audit_server.py` | 監査を `list_departments`・`audit_department` として出す自作の MCP サーバー（標準ライブラリのみ、本文は返さない）と、AWS ドキュメントの MCP サーバー（1.2.2 に固定） |
+| Power | `powers/kb-ingestion-audit/` | `plugin.json`・`mcp.json`・`skills/audit-ingestion/SKILL.md` を同梱した自作 Power。IDE にはこれとレジストリの Power（AWS 関連）を導入した |
+| カスタムエージェント | `.kiro/agents/kb-auditor.json` | 読み取り専用の監査担当。シェルはテストと監査 CLI だけ、`rm`・AWS の変更系・`git push` などは拒否。`kiro-cli chat --agent kb-auditor` で全部署を監査できる |
+| Kiro Web | （クラウド構成） | steering・agents・hooks をクラウド構成にアップロードし、このリポジトリを付けたクラウドセッションで構成の読み込みを確かめた。サンドボックスは外部通信が制限されるため pytest の依存は取得できず、テストは手元で実行している |
+
+監査の作りは `kbaudit/`（`normalise`・`matching`・`spans`・`collect`・`report`）。KB のリソースポリシーで直接の Retrieve は拒否される（部署分離の④）ので、監査も利用者と同じく Gateway の `kb___Retrieve` を部署のメンバーとして呼ぶ。
+
 ## 構成
 
 ```
