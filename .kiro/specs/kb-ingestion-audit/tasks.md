@@ -39,7 +39,7 @@
   - [x] 5.2 Unit tests with a fake `retrieve`: duplicates across queries, a chunk from
     another department
     - _Requirements: 4.2, 5.2_
-  - [-] 5.3 Property test for property 9
+  - [x] 5.3 Property test for property 9
     - _Requirements: 4.2_
 
 - [x] 6. Wire the command line
