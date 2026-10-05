@@ -1,0 +1,31 @@
+# 手元で動かすスクリプト（scripts/）の依存。uv sync で .venv を作る。
+# Lambda の依存は scripts/build_functions.sh が関数ごとに入れる（ここではない）。
+[project]
+name = "managed-kb-prototype-scripts"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.43.36",        # userContext（ACL）に対応した版から
+    "python-docx>=1.2",
+    "python-pptx>=1.0",
+    "openpyxl>=3.1",
+    "pillow>=12",
+    "pypdfium2>=5",
+    "lxml>=6",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.14", "playwright>=1.55"]
+
+[tool.uv]
+package = false
+
+# uv run ruff check functions scripts
+[tool.ruff]
+target-version = "py313"
+line-length = 130
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "B", "UP", "SIM", "RET", "PIE"]
+# 長い行・日本語の文を含む行は折り返さない。% の書式は XML の名前空間で使っている
+ignore = ["E501", "E741", "UP031", "SIM105"]

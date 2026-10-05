@@ -1,0 +1,26 @@
+{
+  "prefix": "mkbproto",
+  "region": "ap-northeast-1",
+  "departments": [
+    {
+      "id": "sales",
+      "name": "営業部"
+    },
+    {
+      "id": "legal",
+      "name": "法務部"
+    }
+  ],
+  "tags": [
+    "要確認",
+    "最新版",
+    "社外秘",
+    "2026年度"
+  ],
+  "models": {
+    "convert": "jp.anthropic.claude-sonnet-4-6",
+    "agent": "jp.anthropic.claude-sonnet-4-6"
+  },
+  "alertEmail": "",
+  "notifyFrom": ""
+}
