@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: ["functions/convert/**", "functions/sync/**", "scripts/audit_*.py", "audit/**"]
+fileMatchPattern: ["functions/convert/**", "functions/sync/**", "scripts/audit_*.py", "kbaudit/**"]
 ---
 
 # KB ingestion: only Markdown reaches the knowledge base

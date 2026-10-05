@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.14", "playwright>=1.55"]
+dev = ["ruff>=0.14", "playwright>=1.55", "pytest>=8.4", "hypothesis>=6.140"]
 
 [tool.uv]
 package = false
@@ -29,3 +29,6 @@ line-length = 130
 select = ["F", "E", "W", "B", "UP", "SIM", "RET", "PIE"]
 # 長い行・日本語の文を含む行は折り返さない。% の書式は XML の名前空間で使っている
 ignore = ["E501", "E741", "UP031", "SIM105"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

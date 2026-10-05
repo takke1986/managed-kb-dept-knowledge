@@ -8,11 +8,12 @@ can be tested exhaustively; the AWS-facing part is a thin layer that only reads.
 
 ```
 scripts/audit_ingestion.py   CLI: arguments, AWS clients, summary, exit status
-audit/
+kbaudit/
   normalise.py               normalise(text) -> str                       (Req 1)
   matching.py                classify(chunk, source) -> Verdict           (Req 2)
   spans.py                   diff_spans(chunk, source) -> list[Span]      (Req 3)
   collect.py                 retrieve + de-duplicate chunks, load sources (Req 4, 5)
+  report.py                  classify every chunk, isolation check, summary (Req 2, 4, 5)
 tests/                       pytest, plus Hypothesis for the properties below
 ```
 
@@ -25,7 +26,7 @@ operator ──► audit_ingestion.py
                │     filter {"equals": {"key": "department", "value": <department>}}
                │  3. GetObject kb-source/<department>/<doc_id>/<file>.md  (DocsBucket)
                ▼
-            audit.collect ──► audit.matching ──► audit.spans
+            kbaudit.collect ──► kbaudit.matching ──► kbaudit.spans
                ▼
             summary on stdout, optional --json, exit status 0/1
 ```
@@ -37,7 +38,7 @@ member sees - the property we want to check - and cannot accidentally widen its 
 
 ## Components and interfaces
 
-### `audit.normalise`
+### `kbaudit.normalise`
 
 ```python
 def normalise(text: str) -> str:
@@ -47,7 +48,7 @@ def normalise(text: str) -> str:
 NFKC folds full-width ASCII and digits (`１２` -> `12`) and compatibility forms. Whitespace
 removal absorbs line re-flow from chunking. Both are layout, not content.
 
-### `audit.matching`
+### `kbaudit.matching`
 
 ```python
 class Verdict(StrEnum):
@@ -71,7 +72,7 @@ Order of checks: image metadata -> empty -> source missing -> substring test. Th
 test is the only thing that can produce VERBATIM. No similarity threshold is used for the
 verdict (`.kiro/steering/audit-matching.md`, rule 2).
 
-### `audit.spans`
+### `kbaudit.spans`
 
 ```python
 @dataclass(frozen=True)
@@ -89,16 +90,20 @@ def diff_spans(chunk_text: str, source_text: str, limit: int = 5) -> list[Span]
 3. Run `SequenceMatcher` on window vs chunk and keep `replace`, `delete` and `insert`
    opcodes, truncating each side to 40 characters.
 
-### `audit.collect`
+### `kbaudit.collect`
 
 ```python
 def source_key_for(chunk: dict) -> str | None
 def collect_chunks(retrieve: Callable[[str], list[dict]], queries: list[str]) -> list[dict]
 ```
 
-`source_key_for` prefers the chunk's S3 location URI (it is the `.md` key the KB indexed);
-otherwise it derives the key from `metadata.original_key` with `DocRef` from
-`functions/shared/common.py`, so the key format has a single definition.
+`source_key_for` reads the key the KB itself indexed: `documentId` (`s3://<bucket>/<key>`),
+then `location.s3Location.uri` (URL-encoded https), then `metadata._source_uri`. Using the KB's
+own location, rather than re-deriving the key from `original_key`, means a mismatch between
+what we think we wrote and what was indexed shows up as UNMATCHED instead of being hidden.
+
+The package is named `kbaudit` because `scripts/audit.py` (the operation log viewer) already
+uses the module name `audit` on the scripts path.
 
 `collect_chunks` de-duplicates on the chunk's location plus its text, because the same
 chunk is commonly returned for several queries.

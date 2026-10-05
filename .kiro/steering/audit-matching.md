@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: ["audit/**", "scripts/audit_*.py", "tests/**"]
+fileMatchPattern: ["kbaudit/**", "scripts/audit_*.py", "tests/**"]
 ---
 
 # Comparing retrieved chunks with their source
